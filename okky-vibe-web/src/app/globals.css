@@ -71,3 +71,57 @@ body {
   50% { transform: translateY(-10px); }
   100% { transform: translateY(0px); }
 }
+
+@keyframes paint-stroke {
+  0% { stroke-dashoffset: 1000; opacity: 0; }
+  10% { opacity: 1; }
+  100% { stroke-dashoffset: 0; opacity: 1; }
+}
+
+@keyframes brush-move {
+  0% { transform: translate(10%, 20%) rotate(-10deg); }
+  25% { transform: translate(70%, 10%) rotate(5deg); }
+  50% { transform: translate(50%, 60%) rotate(-5deg); }
+  75% { transform: translate(20%, 70%) rotate(10deg); }
+  100% { transform: translate(10%, 20%) rotate(-10deg); }
+}
+
+@keyframes color-pulse {
+  0%, 100% { opacity: 0.3; transform: scale(1); }
+  50% { opacity: 0.7; transform: scale(1.1); }
+}
+
+@keyframes shimmer-wave {
+  0% { background-position: -200% center; }
+  100% { background-position: 200% center; }
+}
+
+@keyframes dot-bounce {
+  0%, 80%, 100% { transform: scale(0.8); opacity: 0.5; }
+  40% { transform: scale(1.2); opacity: 1; }
+}
+
+@layer utilities {
+  .animate-paint-stroke {
+    stroke-dasharray: 1000;
+    stroke-dashoffset: 1000;
+    animation: paint-stroke 2.5s ease-out forwards;
+  }
+
+  .animate-brush {
+    animation: brush-move 4s ease-in-out infinite;
+  }
+
+  .animate-color-blob {
+    animation: color-pulse 2s ease-in-out infinite;
+  }
+
+  .shimmer-text {
+    background: linear-gradient(90deg, var(--color-brand-400), #8b5cf6, var(--color-brand-400));
+    background-size: 200% auto;
+    background-clip: text;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    animation: shimmer-wave 2s linear infinite;
+  }
+}

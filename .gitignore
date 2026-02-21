@@ -123,3 +123,6 @@ logs/
 *.swp
 *.swo
 .claude/tsc-cache/
+
+
+env.local

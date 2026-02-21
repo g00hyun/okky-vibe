@@ -2,7 +2,6 @@
 
 import { useState } from 'react';
 import { Card } from '@/components/ui/Card';
-import { Skeleton } from '@/components/ui/Skeleton';
 import { Flashcard } from '@/components/ui/Flashcard';
 
 interface VSUResult {
@@ -117,11 +116,61 @@ export default function Home() {
           
           <div className="relative px-4 sm:px-12 pb-12">
             {isLoading ? (
-               <Card className="flex flex-col gap-4 aspect-square md:aspect-[4/3] w-full max-w-2xl mx-auto items-center justify-center p-8 bg-white dark:bg-slate-900 border-2 border-brand-100 dark:border-brand-900 shadow-xl">
-                 <Skeleton className="w-[80%] h-12 rounded-xl mb-8" />
-                 <Skeleton className="w-[60%] h-8 rounded-xl" />
-                 <div className="absolute inset-x-0 bottom-8 flex justify-center">
-                   <Skeleton className="w-10 h-10 rounded-full" />
+               <Card className="relative overflow-hidden aspect-square md:aspect-[4/3] w-full max-w-2xl mx-auto bg-white dark:bg-slate-900 border-2 border-brand-100 dark:border-brand-900 shadow-xl flex flex-col items-center justify-center gap-6 p-8">
+                 {/* 배경 색상 blob들 */}
+                 <div className="absolute top-[15%] left-[20%] w-32 h-32 rounded-full bg-brand-300/20 blur-2xl animate-color-blob" style={{ animationDelay: '0s' }} />
+                 <div className="absolute top-[40%] right-[15%] w-40 h-40 rounded-full bg-purple-400/20 blur-2xl animate-color-blob" style={{ animationDelay: '0.7s' }} />
+                 <div className="absolute bottom-[20%] left-[30%] w-36 h-36 rounded-full bg-pink-300/20 blur-2xl animate-color-blob" style={{ animationDelay: '1.4s' }} />
+
+                 {/* 캔버스 SVG — 붓질 획이 순서대로 그려짐 */}
+                 <div className="relative w-48 h-48 md:w-56 md:h-56 flex-shrink-0">
+                   <svg viewBox="0 0 200 200" className="w-full h-full" fill="none">
+                     {/* 배경 캔버스 */}
+                     <rect x="10" y="10" width="180" height="180" rx="12" fill="currentColor" className="text-slate-100 dark:text-slate-800" />
+                     {/* 붓질 획 1 — 수평 */}
+                     <path d="M 30 70 Q 80 55 150 75" stroke="#2dd4bf" strokeWidth="8" strokeLinecap="round"
+                       style={{ strokeDasharray: 200, strokeDashoffset: 200, animation: 'paint-stroke 1.2s ease-out 0.2s forwards' }} />
+                     {/* 붓질 획 2 — 곡선 */}
+                     <path d="M 40 100 Q 100 85 160 105" stroke="#8b5cf6" strokeWidth="6" strokeLinecap="round"
+                       style={{ strokeDasharray: 200, strokeDashoffset: 200, animation: 'paint-stroke 1.2s ease-out 0.7s forwards' }} />
+                     {/* 붓질 획 3 — 짧은 포인트 */}
+                     <path d="M 50 130 Q 90 120 140 135" stroke="#f472b6" strokeWidth="7" strokeLinecap="round"
+                       style={{ strokeDasharray: 150, strokeDashoffset: 150, animation: 'paint-stroke 1s ease-out 1.2s forwards' }} />
+                     {/* 원형 도트 */}
+                     <circle cx="60" cy="155" r="8" fill="#2dd4bf"
+                       style={{ opacity: 0, animation: 'paint-stroke 0.5s ease-out 1.8s forwards' }} />
+                     <circle cx="100" cy="160" r="6" fill="#8b5cf6"
+                       style={{ opacity: 0, animation: 'paint-stroke 0.5s ease-out 2.0s forwards' }} />
+                     <circle cx="138" cy="155" r="7" fill="#f472b6"
+                       style={{ opacity: 0, animation: 'paint-stroke 0.5s ease-out 2.2s forwards' }} />
+                     {/* 이젤 프레임 */}
+                     <rect x="10" y="10" width="180" height="180" rx="12" stroke="currentColor" strokeWidth="3"
+                       className="text-brand-200 dark:text-brand-800" fill="none" />
+                   </svg>
+
+                   {/* 움직이는 붓 아이콘 */}
+                   <div className="absolute -top-3 -right-3 text-2xl animate-brush pointer-events-none select-none">
+                     🖌️
+                   </div>
+                 </div>
+
+                 {/* 텍스트 + 점 */}
+                 <div className="flex flex-col items-center gap-3 z-10">
+                   <p className="text-base md:text-lg font-semibold shimmer-text tracking-wide">
+                     AI가 그림을 그리고 있어요
+                   </p>
+                   <div className="flex items-center gap-1.5">
+                     {[0, 0.2, 0.4].map((delay, i) => (
+                       <span
+                         key={i}
+                         className="w-2 h-2 rounded-full bg-brand-400"
+                         style={{ animation: `dot-bounce 1.2s ease-in-out ${delay}s infinite` }}
+                       />
+                     ))}
+                   </div>
+                   <p className="text-xs text-slate-400 dark:text-slate-500 mt-1">
+                     잠시만 기다려주세요 ✨
+                   </p>
                  </div>
                </Card>
             ) : results.length > 0 ? (
