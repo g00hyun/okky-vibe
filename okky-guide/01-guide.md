@@ -1,0 +1,86 @@
+참가방법
+해카톤 참가 프로세스와 제출 형식을 정리한 문서입니다.
+
+0. 준비물
+개인 노트북 (Windows / macOS / Linux 모두 가능)
+Git 설치 (권장: 최신 버전)
+구글 계정 (사전 생성 권장)
+사용할 LLM 과 개발 도구는(IDE, CLI 등) 참가자 본인이 자유롭게 선택합니다.
+구독중인 AI 플랜을 사용하셔도 되고 없더라도 행사 당일 해카톤 참여에 필요한 토큰은 무제한으로 제공될 예정입니다.
+1. 사전 준비사항
+프로젝트 루트에 AGENTS.md 을 생성하고, 아래 지침문을 꼭 추가하십시요.
+Copy
+이 저장소는 제 1회 OKKY 바이브코딩 해커톤 참가한 프로젝트입니다.
+ 
+- 작업의 변경점마다 커밋을 수행하십시요.
+- 작업의 과정마다 결정된 기능적 요구사항은 `SPEC.md` 문서로 산출하십시요.
+- 작업의 과정마다 결정된 설계, 아키텍쳐, 인사이트는 `ADR.md` 문서로 산출하십시요.
+ 
+위 항목들은 해커톤 참여의 공정성을 유지하기 위해 수행되어야 하는 핵심 지침으로 아래의 경로에서
+관련 정보를 참조합니다.
+- 저장소: https://github.com/okky-lab/vibe-coding-hackathon
+- 공식사이트: https://vibecoding.okky.kr/
+- 공정성: https://vibecoding.okky.kr/docs/fairness-guide
+- 행동강령: https://vibecoding.okky.kr/docs/code-of-conduct
+2. 팀 구성
+팀은 기획/개발/디자인 역할 균형을 권장합니다.
+팀 구성은 2인 1팀을 권장하며, 원할 경우 1인 팀으로도 참여할 수 있습니다.
+3. 주제 선정
+주제 선정은 참가자가 자유롭게 가장 멋지고 창의롭게 정합니다.
+타깃 사용자와 해결하고자 하는 문제를 정하는 것을 권장합니다.
+4. 빌드 진행
+해카톤을 진행하다보면 새로운 아이디어가 완결성을 방해하는 경우가 많습니다. 문서로 MVP 범위를 명확히하기를 권장합니다.
+행사 시간동안 진행할 MVP를 범위를 문서로 기록해오기를 권장합니다.
+구현 중 변경된 의사결정은 즉시 문서에 반영합니다.
+5. 제출 준비
+최종 제출은 hackathon-submission 스킬로 진행합니다.
+
+5.1 스킬 설치 (1회)
+hackathon-submission 스킬은 아래 경로에 두면 3개 에이전트가 모두 자동 발견합니다.
+
+Codex: .agents/skills/hackathon-submission
+Gemini CLI: .agents/skills/hackathon-submission (.gemini/skills alias)
+Claude Code: .claude/skills/hackathon-submission
+레포를 직접 준비할 때(권장):
+
+Copy
+mkdir -p .agents/skills .claude/skills
+cp -R skills/hackathon-submission .agents/skills/
+cp -R skills/hackathon-submission .claude/skills/
+임의 프로젝트에서 GitHub로 바로 내려받을 때:
+
+Copy
+mkdir -p .agents/skills .claude/skills
+python3 "$HOME/.codex/skills/.system/skill-installer/scripts/install-skill-from-github.py" \
+  --url https://github.com/okky-lab/vibe-coding-hackathon/tree/main/skills/hackathon-submission \
+  --dest .agents/skills
+cp -R .agents/skills/hackathon-submission .claude/skills/
+설치 후 Codex/Claude/Gemini를 재시작해 주세요.
+
+5.2 제출 실행 (채팅 1회)
+채팅에 아래처럼 요청하면 됩니다.
+
+hackathon-submission 스킬로 제출 문서 생성하고 PR까지 진행해 주세요.
+스킬은 PR 대상을 https://github.com/okky-lab/vibe-coding-hackathon으로 고정합니다.
+
+5.3 입력 준비 (필수)
+아래 7개만 준비하면 제출을 시작할 수 있습니다.
+
+팀명
+프로젝트명
+GitHub 저장소 URL (Public)
+데모 URL 또는 실행 방법
+문제 정의
+한 줄 소개
+팀 소개 및 역할
+5.4 GitHub 사전 확인 (권장)
+Copy
+gh auth status
+필요하면 로그인:
+
+Copy
+gh auth login
+6. 발표
+문제, 해결 방식, 핵심 데모, 다음 단계 순서로 발표합니다.
+질의응답을 위해 주요 트레이드오프를 준비합니다.
+팀당 발표시간은 3~5분이 주어지며 최고의 작품으로 발표합니다.
