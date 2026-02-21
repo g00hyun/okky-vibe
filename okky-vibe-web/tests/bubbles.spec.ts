@@ -29,10 +29,10 @@ test('Floating bubbles avoid center content area', async ({ page }) => {
       const leftValue = parseFloat(leftMatch[1]);
       console.log(`Bubble ${i} left position: ${leftValue}%`);
 
-      // Define safe zones: 0-20% (Left) OR 80-100% (Right)
+      // Define safe zones: 5-20% (Left) OR 80-95% (Right)
       // Center area to avoid: 20% < left < 80%
-      const isLeftSafe = leftValue >= 0 && leftValue <= 20; 
-      const isRightSafe = leftValue >= 80 && leftValue <= 100;
+      const isLeftSafe = leftValue >= 5 && leftValue <= 20; 
+      const isRightSafe = leftValue >= 80 && leftValue <= 95;
 
       const isSafe = isLeftSafe || isRightSafe;
       

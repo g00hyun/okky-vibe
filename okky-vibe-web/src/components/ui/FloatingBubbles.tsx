@@ -22,10 +22,12 @@ export function FloatingBubbles({ onSelect }: FloatingBubblesProps) {
   const spawnBubble = useCallback(() => {
     const randomQuote = QUOTES[Math.floor(Math.random() * QUOTES.length)];
     const isLeft = Math.random() > 0.5;
-    const sideMargin = 2; // minimum margin from edge
-    const centerAvoid = 40; // avoid center 80% (40% from each side of center)
+    const sideMargin = 5; // minimum margin from edge (was 2)
+    const centerAvoid = 35; // avoid center 70% (35% from each side of center)
     
-    // Calculate left position: either 2-10% (left side) or 90-98% (right side)
+    // Calculate left position:
+    // Left: 5% + random(0~10%) -> 5~15%
+    // Right: 100% - 5% - random(0~10%) -> 85~95%
     const randomOffset = Math.random() * (50 - centerAvoid - sideMargin); 
     const left = isLeft 
       ? sideMargin + randomOffset 
