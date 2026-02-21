@@ -1,8 +1,9 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { Card } from '@/components/ui/Card';
 import { Flashcard } from '@/components/ui/Flashcard';
+import { FloatingBubbles } from '@/components/ui/FloatingBubbles';
 
 interface VSUResult {
   text: string;
@@ -15,8 +16,15 @@ export default function Home() {
   const [results, setResults] = useState<VSUResult[]>([]);
   const [error, setError] = useState('');
   const [currentCardIndex, setCurrentCardIndex] = useState(0);
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  const handleBubbleSelect = (text: string) => {
+    setInputText(text);
+    inputRef.current?.focus();
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
+
     e.preventDefault();
     if (!inputText.trim()) return;
 
@@ -50,8 +58,11 @@ export default function Home() {
   };
 
   return (
-    <div className="flex flex-col items-center justify-start flex-grow py-12 md:py-20 px-4">
-      <div className="w-full text-center space-y-6 max-w-3xl glass p-8 md:p-12 rounded-3xl animate-float">
+    <>
+      <FloatingBubbles onSelect={handleBubbleSelect} />
+      <div className="relative z-10 flex flex-col items-center justify-start flex-grow py-12 md:py-20 px-4">
+        <div className="w-full text-center space-y-6 max-w-3xl glass p-8 md:p-12 rounded-3xl animate-float">
+
         <div className="inline-flex items-center justify-center px-4 py-1.5 rounded-full border border-brand-200 dark:border-brand-800 bg-brand-50/50 dark:bg-brand-950/50 text-brand-600 dark:text-brand-300 text-sm font-medium tracking-wide mb-4">
           ✨ MVP Ready
         </div>
@@ -69,6 +80,7 @@ export default function Home() {
             <div className="absolute -inset-1 bg-gradient-to-r from-brand-400 to-purple-500 rounded-2xl blur opacity-25 group-hover:opacity-40 transition duration-1000 group-hover:duration-200"></div>
             <div className="relative flex items-center bg-white dark:bg-slate-900 rounded-2xl p-2 ring-1 ring-slate-200 dark:ring-slate-800 shadow-xl">
               <input 
+                ref={inputRef}
                 type="text" 
                 value={inputText}
                 onChange={(e) => setInputText(e.target.value)}
@@ -76,6 +88,7 @@ export default function Home() {
                 className="w-full bg-transparent px-4 py-3 text-slate-900 dark:text-slate-100 placeholder:text-slate-400 focus:outline-none"
                 disabled={isLoading}
               />
+
               <button 
                 type="submit"
                 className="bg-brand-500 hover:bg-brand-600 text-white font-medium py-3 px-6 rounded-xl transition-colors shadow-md disabled:opacity-50 whitespace-nowrap flex items-center justify-center min-w-[100px]"
@@ -211,5 +224,6 @@ export default function Home() {
         </div>
       )}
     </div>
+    </>
   );
 }
