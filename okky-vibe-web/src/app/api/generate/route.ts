@@ -28,22 +28,43 @@ export async function POST(req: NextRequest) {
       }
     });
 
-    // Step 1: Extract Visual Semantic Units (VSU) using OpenRouter
-    let vsus: { text: string; imagePrompt: string }[] = [];
+    // Step 1: Extract VSUs with shared story context for visual continuity
+    let vsus: { text: string; imagePrompt: string; keywords: string }[] = [];
     try {
       const completion = await openai.chat.completions.create({
         model: "google/gemini-2.5-flash",
         messages: [
           {
             role: "system",
-            content: `You are an API that converts text into Visual Semantic Units (VSUs). 
-You MUST respond with valid JSON containing a single object with a "vsus" key. 
-The "vsus" key must contain an array of objects. 
-Each object must have a "text" string (a meaningful chunk of the original text) and an "imagePrompt" string (a detailed English prompt to generate an image for that text).`
+            content: `You are a visual storytelling API that converts sentences into connected storyboard panels.
+
+Respond ONLY with valid JSON in this exact structure:
+{
+  "storyContext": {
+    "character": "brief description of the main subject/person (appearance, clothing, age)",
+    "setting": "overall location and atmosphere",
+    "artStyle": "one consistent art style for all panels (e.g. 'warm cinematic photography', 'soft watercolor illustration', 'cozy children's book illustration')"
+  },
+  "vsus": [
+    {
+      "text": "chunk of the original sentence",
+      "imagePrompt": "A scene description that MUST reference storyContext character and setting. Describe the specific action/moment happening in this panel. Write as a cinematic shot description.",
+      "keywords": "2-3 simple English nouns for photo search"
+    }
+  ]
+}
+
+CRITICAL RULES for imagePrompt:
+- Every panel MUST feature the same character from storyContext
+- Every panel MUST be set in the same location from storyContext
+- Every panel MUST use the exact artStyle from storyContext
+- Describe a SPECIFIC MOMENT or ACTION, not just an object
+- Write like a film director describing a shot: "Medium shot of [character] [doing action] in [setting], [art style]"
+- Panels must feel like sequential frames of the same story`
           },
           {
             role: "user",
-            content: `Analyze the following text and break it down into meaningful visual semantic units (VSUs).\n\nText: "${text}"`
+            content: `Convert this sentence into a connected visual story with 2-4 storyboard panels:\n\n"${text}"`
           }
         ],
         response_format: { type: "json_object" }
@@ -52,7 +73,13 @@ Each object must have a "text" string (a meaningful chunk of the original text) 
       const responseText = completion.choices[0]?.message?.content;
       if (responseText) {
         const parsed = JSON.parse(responseText);
-        vsus = parsed.vsus || [];
+        const storyContext = parsed.storyContext;
+
+        // Inject storyContext into each VSU's imagePrompt for consistency
+        vsus = (parsed.vsus || []).map((vsu: { text: string; imagePrompt: string; keywords: string }) => ({
+          ...vsu,
+          imagePrompt: `${vsu.imagePrompt}. Art style: ${storyContext?.artStyle ?? "cinematic photorealistic"}. Consistent character: ${storyContext?.character ?? ""}. Setting: ${storyContext?.setting ?? ""}. High quality, story illustration.`,
+        }));
       }
     } catch (e) {
       console.error("Failed to generate VSU", e);
@@ -96,10 +123,23 @@ Each object must have a "text" string (a meaningful chunk of the original text) 
           throw new Error("No image URL found in response");
         }
       } catch (imageError) {
-        console.error("Image generation failed, falling back to pollinations.ai:", imageError);
-        // Fallback to pollinations.ai
-        const seed = Math.floor(Math.random() * 1000000);
-        imageUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(vsu.imagePrompt)}?width=400&height=400&nologo=true&seed=${seed}`;
+        console.error("Gemini image failed, falling back to loremflickr:", imageError);
+        // Fallback: loremflickr server-side fetch → base64 (avoids CORS)
+        try {
+          const keyword = encodeURIComponent(
+            (vsu as { keywords?: string }).keywords?.split(",")[0]?.trim() || "scene"
+          );
+          const seed = Math.floor(Math.random() * 10000);
+          const flickrRes = await fetch(`https://loremflickr.com/400/400/${keyword}?lock=${seed}`, { redirect: "follow" });
+          if (flickrRes.ok) {
+            const buf = await flickrRes.arrayBuffer();
+            const b64 = Buffer.from(buf).toString("base64");
+            const mime = flickrRes.headers.get("content-type") ?? "image/jpeg";
+            imageUrl = `data:${mime};base64,${b64}`;
+          }
+        } catch (fallbackErr) {
+          console.error("Fallback image also failed:", fallbackErr);
+        }
       }
 
       return {
