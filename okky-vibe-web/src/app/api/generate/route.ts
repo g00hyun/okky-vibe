@@ -63,20 +63,50 @@ Each object must have a "text" string (a meaningful chunk of the original text) 
       return NextResponse.json({ error: "No semantic units found" }, { status: 500 });
     }
 
-    // Step 2: Generate an image for each VSU concurrently
-    // Since OpenRouter doesn't natively do Imagen generation via chat completions, 
-    // we use a free placeholder API (pollinations.ai) which generates images from prompt URLs.
-    // This allows the MVP to show real images without a second API key.
-    const results = vsus.map((vsu) => {
-      // Create a deterministic seed based on text to avoid re-generating on every render
-      const seed = Math.floor(Math.random() * 1000000);
-      const imageUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(vsu.imagePrompt)}?width=400&height=400&nologo=true&seed=${seed}`;
-      
+    // Step 2: Generate an image for each VSU concurrently using OpenRouter's gemini-3-pro-image-preview
+    const results = await Promise.all(vsus.map(async (vsu) => {
+      let imageUrl = "";
+      try {
+        const imageResponse = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+          method: "POST",
+          headers: {
+            "Authorization": `Bearer ${apiKey}`,
+            "Content-Type": "application/json",
+            "HTTP-Referer": process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000",
+            "X-Title": "VisualLang",
+          },
+          body: JSON.stringify({
+            model: "google/gemini-3-pro-image-preview",
+            messages: [{ role: "user", content: vsu.imagePrompt }],
+            modalities: ["image"]
+          })
+        });
+
+        if (!imageResponse.ok) {
+          console.error("OpenRouter image API error:", await imageResponse.text());
+          throw new Error(`OpenRouter API error: ${imageResponse.status}`);
+        }
+
+        const data = await imageResponse.json();
+        const base64Url = data.choices?.[0]?.message?.images?.[0]?.image_url?.url;
+
+        if (base64Url) {
+          imageUrl = base64Url;
+        } else {
+          throw new Error("No image URL found in response");
+        }
+      } catch (imageError) {
+        console.error("Image generation failed, falling back to pollinations.ai:", imageError);
+        // Fallback to pollinations.ai
+        const seed = Math.floor(Math.random() * 1000000);
+        imageUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(vsu.imagePrompt)}?width=400&height=400&nologo=true&seed=${seed}`;
+      }
+
       return {
         text: vsu.text,
         imageUrl: imageUrl
       };
-    });
+    }));
 
     return NextResponse.json(results);
   } catch (error: any) {
