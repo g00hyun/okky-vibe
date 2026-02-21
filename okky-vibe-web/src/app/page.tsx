@@ -63,9 +63,6 @@ export default function Home() {
       <div className="relative z-10 flex flex-col items-center justify-start flex-grow py-12 md:py-20 px-4">
         <div className="w-full text-center space-y-6 max-w-3xl glass p-8 md:p-12 rounded-3xl animate-float">
 
-        <div className="inline-flex items-center justify-center px-4 py-1.5 rounded-full border border-brand-200 dark:border-brand-800 bg-brand-50/50 dark:bg-brand-950/50 text-brand-600 dark:text-brand-300 text-sm font-medium tracking-wide mb-4">
-          ✨ MVP Ready
-        </div>
         <h1 className="text-5xl md:text-7xl font-bold font-[family-name:var(--font-outfit)] tracking-tight">
           Visual<span className="text-gradient">Lang</span>
         </h1>
