@@ -21,10 +21,20 @@ export function FloatingBubbles({ onSelect }: FloatingBubblesProps) {
 
   const spawnBubble = useCallback(() => {
     const randomQuote = QUOTES[Math.floor(Math.random() * QUOTES.length)];
+    const isLeft = Math.random() > 0.5;
+    const sideMargin = 2; // minimum margin from edge
+    const centerAvoid = 40; // avoid center 80% (40% from each side of center)
+    
+    // Calculate left position: either 2-10% (left side) or 90-98% (right side)
+    const randomOffset = Math.random() * (50 - centerAvoid - sideMargin); 
+    const left = isLeft 
+      ? sideMargin + randomOffset 
+      : 100 - sideMargin - randomOffset;
+
     const newBubble: Bubble = {
       id: `bubble-${nextIdRef.current++}`,
       text: randomQuote.text,
-      left: Math.random() * 80 + 10, // 10% to 90%
+      left: left,
       duration: Math.random() * 10 + 15, // 15-25s
       scale: Math.random() * 0.3 + 0.85, // 0.85 - 1.15
     };
@@ -56,11 +66,11 @@ export function FloatingBubbles({ onSelect }: FloatingBubblesProps) {
   };
 
   return (
-    <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden">
+    <div className="fixed inset-0 pointer-events-none z-50 overflow-hidden">
       {bubbles.map((bubble) => (
         <div
           key={bubble.id}
-          className="absolute bottom-[-100px] pointer-events-auto cursor-pointer animate-bubble hover:z-50"
+          className="absolute bottom-[-100px] pointer-events-auto cursor-pointer animate-bubble hover:z-[60]"
           style={{
             left: `${bubble.left}%`,
             animationDuration: `${bubble.duration}s`,
