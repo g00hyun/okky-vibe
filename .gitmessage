@@ -1,0 +1,15 @@
+type(scope): 한 줄 요약
+ 
+Why:
+- 변경 배경/문제
+ 
+What:
+- 핵심 변경 사항
+ 
+Verify:
+- pnpm lint
+- pnpm typecheck
+- pnpm test:e2e
+ 
+Refs:
+- #이슈번호 또는 링크
