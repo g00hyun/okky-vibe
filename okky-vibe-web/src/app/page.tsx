@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { Card } from '@/components/ui/Card';
 import { Skeleton } from '@/components/ui/Skeleton';
+import { Flashcard } from '@/components/ui/Flashcard';
 
 interface VSUResult {
   text: string;
@@ -14,6 +15,7 @@ export default function Home() {
   const [isLoading, setIsLoading] = useState(false);
   const [results, setResults] = useState<VSUResult[]>([]);
   const [error, setError] = useState('');
+  const [currentCardIndex, setCurrentCardIndex] = useState(0);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -22,6 +24,7 @@ export default function Home() {
     setIsLoading(true);
     setError('');
     setResults([]);
+    setCurrentCardIndex(0);
 
     try {
       const response = await fetch('/api/generate', {
@@ -100,43 +103,61 @@ export default function Home() {
 
       {/* Results Section */}
       {(isLoading || results.length > 0) && (
-        <div className="w-full max-w-6xl mt-16 space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
-          <div className="flex items-center justify-between border-b border-foreground/10 pb-4">
+        <div className="w-full max-w-4xl mt-16 space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700 mx-auto">
+          <div className="flex items-center justify-between border-b border-foreground/10 pb-4 px-4 sm:px-0">
              <h2 className="text-2xl font-bold text-brand-600 dark:text-brand-300">
                시각화 결과
              </h2>
+             {results.length > 0 && !isLoading && (
+               <div className="text-sm font-medium text-slate-500 bg-slate-100 dark:bg-slate-800 px-3 py-1 rounded-full">
+                 {currentCardIndex + 1} / {results.length}
+               </div>
+             )}
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          
+          <div className="relative px-4 sm:px-12 pb-12">
             {isLoading ? (
-               // Skeletons while loading
-               Array.from({ length: 3 }).map((_, i) => (
-                <Card key={i} className="flex flex-col gap-4">
-                  <Skeleton className="aspect-square w-full rounded-2xl" />
-                  <div className="space-y-2">
-                    <Skeleton className="h-6 w-[80%]" />
-                    <Skeleton className="h-4 w-[60%]" />
-                  </div>
-                </Card>
-              ))
-            ) : (
-              // Actual results
-              results.map((result, i) => (
-                <Card key={i} className="flex flex-col gap-4 overflow-hidden group">
-                  <div className="relative aspect-square w-full rounded-2xl overflow-hidden bg-slate-100 dark:bg-slate-800">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img 
-                      src={result.imageUrl} 
-                      alt={result.text}
-                      className="object-cover w-full h-full transition-transform duration-500 group-hover:scale-105"
-                    />
-                  </div>
-                  <div>
-                    <h3 className="text-xl font-bold mb-1 text-slate-900 dark:text-white">{result.text}</h3>
-                    <p className="text-foreground/60 text-sm font-medium">Concept Block {i + 1}</p>
-                  </div>
-                </Card>
-              ))
-            )}
+               <Card className="flex flex-col gap-4 aspect-square md:aspect-[4/3] w-full max-w-2xl mx-auto items-center justify-center p-8 bg-white dark:bg-slate-900 border-2 border-brand-100 dark:border-brand-900 shadow-xl">
+                 <Skeleton className="w-[80%] h-12 rounded-xl mb-8" />
+                 <Skeleton className="w-[60%] h-8 rounded-xl" />
+                 <div className="absolute inset-x-0 bottom-8 flex justify-center">
+                   <Skeleton className="w-10 h-10 rounded-full" />
+                 </div>
+               </Card>
+            ) : results.length > 0 ? (
+               <div className="relative flex items-center justify-center group">
+                 {/* Prev Button */}
+                 {results.length > 1 && (
+                   <button 
+                     onClick={() => setCurrentCardIndex(prev => Math.max(0, prev - 1))}
+                     disabled={currentCardIndex === 0}
+                     className="absolute left-0 z-10 p-3 lg:p-4 rounded-full bg-white/90 dark:bg-slate-800/90 shadow-[0_0_20px_rgba(0,0,0,0.1)] text-slate-700 dark:text-slate-300 hover:bg-brand-50 hover:text-brand-600 disabled:opacity-0 disabled:pointer-events-none transition-all duration-300 -translate-x-2 sm:-translate-x-6 lg:-translate-x-12 backdrop-blur-sm focus:outline-none hover:scale-110 active:scale-95"
+                     aria-label="Previous card"
+                   >
+                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+                   </button>
+                 )}
+                 
+                 <div className="w-full transition-all duration-300 relative z-0">
+                   <Flashcard 
+                     frontText={results[currentCardIndex].text}
+                     backImageUrl={results[currentCardIndex].imageUrl}
+                   />
+                 </div>
+
+                 {/* Next Button */}
+                 {results.length > 1 && (
+                   <button 
+                     onClick={() => setCurrentCardIndex(prev => Math.min(results.length - 1, prev + 1))}
+                     disabled={currentCardIndex === results.length - 1}
+                     className="absolute right-0 z-10 p-3 lg:p-4 rounded-full bg-white/90 dark:bg-slate-800/90 shadow-[0_0_20px_rgba(0,0,0,0.1)] text-slate-700 dark:text-slate-300 hover:bg-brand-50 hover:text-brand-600 disabled:opacity-0 disabled:pointer-events-none transition-all duration-300 translate-x-2 sm:translate-x-6 lg:translate-x-12 backdrop-blur-sm focus:outline-none hover:scale-110 active:scale-95"
+                     aria-label="Next card"
+                   >
+                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="m9 18 6-6-6-6"/></svg>
+                   </button>
+                 )}
+               </div>
+            ) : null}
           </div>
         </div>
       )}
